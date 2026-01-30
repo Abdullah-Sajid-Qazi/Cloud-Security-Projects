@@ -1,0 +1,20 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadOnlySecurityAudit",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:Describe*",
+        "iam:Get*",
+        "iam:List*",
+        "s3:ListAllMyBuckets",
+        "s3:GetBucketLocation",
+        "cloudtrail:DescribeTrails",
+        "cloudtrail:GetTrailStatus",
+        "cloudwatch:Describe*"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
