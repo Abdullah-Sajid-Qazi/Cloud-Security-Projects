@@ -1,1 +1,14 @@
+graph LR
+    U[Security IAM User<br/>MFA Enabled] -->|sts:AssumeRole| STS[AWS STS]
 
+    subgraph Security_Account[Security Account]
+        U
+    end
+
+    subgraph Workload_Account[Workload Account]
+        R[SecurityAuditRole<br/>Read Only]
+        RES[EC2 / IAM Metadata / CloudTrail]
+        R --> RES
+    end
+
+    STS -->|Temporary Credentials| R
