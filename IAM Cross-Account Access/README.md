@@ -1,4 +1,4 @@
-# Project 1: IAM Cross-Account Access (MFA + STS)
+# Project: IAM Cross-Account Access (MFA + STS)
 
 ## Overview
 
