@@ -30,14 +30,13 @@ This mirrors how security teams operate in mature AWS organizations.
 ## Architecture
 
 ```mermaid
-%% Improved high-visibility architecture diagram
-%% Designed for GitHub dark & light mode
+%% GitHub-compatible Mermaid diagram (fixed syntax)
 
 graph LR
-    U[Security IAM User\n(MFA Enabled)]:::security
-    STS[AWS STS]:::sts
-    R[SecurityAuditRole\n(Read Only)]:::role
-    RES[EC2 / IAM Metadata / CloudTrail]:::resource
+    U["Security IAM User<br/>MFA Enabled"]
+    STS["AWS STS"]
+    R["SecurityAuditRole<br/>Read Only"]
+    RES["EC2 / IAM Metadata / CloudTrail"]
 
     U -->|sts:AssumeRole| STS
     STS -->|Temporary Credentials| R
@@ -52,14 +51,14 @@ graph LR
         RES
     end
 
-    %% High-contrast styling
-    classDef security fill:#0b3c5d,color:#ffffff,stroke:#ffffff,stroke-width:2px;
-    classDef sts fill:#6a1b9a,color:#ffffff,stroke:#ffffff,stroke-width:2px;
-    classDef role fill:#1b5e20,color:#ffffff,stroke:#ffffff,stroke-width:2px;
-    classDef resource fill:#424242,color:#ffffff,stroke:#ffffff,stroke-width:2px;
+    %% Styling (GitHub-safe)
+    style U fill:#0b3c5d,color:#ffffff,stroke:#ffffff,stroke-width:2px
+    style STS fill:#6a1b9a,color:#ffffff,stroke:#ffffff,stroke-width:2px
+    style R fill:#1b5e20,color:#ffffff,stroke:#ffffff,stroke-width:2px
+    style RES fill:#424242,color:#ffffff,stroke:#ffffff,stroke-width:2px
 
-    style SA fill:#e3f2fd,stroke:#0b3c5d,stroke-width:3px;
-    style WA fill:#f1f8e9,stroke:#1b5e20,stroke-width:3px;
+    style SA fill:#e3f2fd,stroke:#0b3c5d,stroke-width:3px
+    style WA fill:#f1f8e9,stroke:#1b5e20,stroke-width:3px
 ```
 
 ---
