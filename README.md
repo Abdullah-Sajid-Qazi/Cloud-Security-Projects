@@ -30,26 +30,36 @@ This mirrors how security teams operate in mature AWS organizations.
 ## Architecture
 
 ```mermaid
-graph LR
-    U[Security IAM User<br/>MFA Enabled] -->|sts:AssumeRole| STS[AWS STS]
+%% Improved high-visibility architecture diagram
+%% Designed for GitHub dark & light mode
 
-    subgraph Security_Account[Security Account]
+graph LR
+    U[Security IAM User\n(MFA Enabled)]:::security
+    STS[AWS STS]:::sts
+    R[SecurityAuditRole\n(Read Only)]:::role
+    RES[EC2 / IAM Metadata / CloudTrail]:::resource
+
+    U -->|sts:AssumeRole| STS
+    STS -->|Temporary Credentials| R
+    R -->|Read Only Access| RES
+
+    subgraph SA[Security Account]
         U
     end
 
-    subgraph Workload_Account[Workload Account]
-        R[SecurityAuditRole<br/>Read Only]
-        RES[EC2 / IAM Metadata / CloudTrail]
-        R --> RES
+    subgraph WA[Workload Account]
+        R
+        RES
     end
 
-    STS -->|Temporary Credentials| R
+    %% High-contrast styling
+    classDef security fill:#0b3c5d,color:#ffffff,stroke:#ffffff,stroke-width:2px;
+    classDef sts fill:#6a1b9a,color:#ffffff,stroke:#ffffff,stroke-width:2px;
+    classDef role fill:#1b5e20,color:#ffffff,stroke:#ffffff,stroke-width:2px;
+    classDef resource fill:#424242,color:#ffffff,stroke:#ffffff,stroke-width:2px;
 
-    classDef sec fill:#e6f2ff,stroke:#1f4fd8,stroke-width:1px;
-    classDef work fill:#f4f4f4,stroke:#555,stroke-width:1px;
-
-    class Security_Account sec;
-    class Workload_Account work;
+    style SA fill:#e3f2fd,stroke:#0b3c5d,stroke-width:3px;
+    style WA fill:#f1f8e9,stroke:#1b5e20,stroke-width:3px;
 ```
 
 ---
