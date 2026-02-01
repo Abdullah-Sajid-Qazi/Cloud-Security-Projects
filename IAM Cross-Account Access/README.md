@@ -137,7 +137,7 @@ This confirms correct least‑privilege enforcement.
 
 Identity confirmed via STS assumed‑role ARN:
 
-
+```
 arn:aws:sts::<workload-account-id>:assumed-role/SecurityAuditRole/<session-name>
 ```
 
