@@ -152,7 +152,7 @@ The following were **deliberate security controls**, not misconfigurations:
 * No direct console access in workload account
 * No long‑lived credentials
 
----
+
 
 ## Security Outcomes
 
