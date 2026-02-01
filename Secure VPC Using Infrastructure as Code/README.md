@@ -7,6 +7,7 @@ This project demonstrates the design and implementation of a **production-grade,
 Rather than focusing on individual AWS services, the goal of this project is to show how a secure network foundation is designed: how exposure is controlled, how traffic is constrained, and how visibility is built in from the start. All infrastructure is defined as code so that intent is explicit, reviewable, and reproducible.
 
 
+
 ## Architecture Summary
 
 The VPC uses the CIDR block **10.0.0.0/16** and spans **two Availability Zones** for resilience and fault isolation. Within each AZ, the network is deliberately segmented into three tiers:
