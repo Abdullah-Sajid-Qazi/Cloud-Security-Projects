@@ -6,7 +6,7 @@ This project demonstrates **production‑grade cross‑account access in AWS** u
 
 This mirrors how security teams operate in mature AWS organizations.
 
----
+
 
 ## Threat Model
 
@@ -25,7 +25,7 @@ This mirrors how security teams operate in mature AWS organizations.
 * Apply **least privilege** in workload accounts
 * Require MFA at the trust boundary
 
----
+
 
 ## Architecture
 
@@ -46,7 +46,7 @@ graph LR
     STS -->|Temporary Credentials| R
 ```
 
----
+
 
 ## IAM Design
 
@@ -79,7 +79,7 @@ Reasoning:
 
 This aligns with enterprise security best practices.
 
----
+
 
 ## Trust Policy (Workload Account)
 
@@ -92,7 +92,7 @@ Key characteristics:
 
 > ExternalId was intentionally omitted for console‑based human access. In production, ExternalId would be enforced for programmatic or third‑party access.
 
----
+
 
 ## Permission Policy (Least Privilege)
 
@@ -117,7 +117,7 @@ Explicitly denied:
 
 This confirms correct least‑privilege enforcement.
 
----
+
 
 ## Temporary Credentials (STS)
 
@@ -137,11 +137,11 @@ This confirms correct least‑privilege enforcement.
 
 Identity confirmed via STS assumed‑role ARN:
 
-```
+
 arn:aws:sts::<workload-account-id>:assumed-role/SecurityAuditRole/<session-name>
 ```
 
----
+
 
 ## Intentional Restrictions
 
@@ -162,7 +162,7 @@ The following were **deliberate security controls**, not misconfigurations:
 * Least privilege validated
 * Clear separation of duties
 
----
+
 
 ## Scaling Considerations
 
@@ -194,7 +194,7 @@ This design scales cleanly as the number of AWS accounts grows.
 
 This prevents privilege creep and reduces blast radius.
 
----
+
 
 ## Monitoring & Detection Recommendations
 
@@ -216,10 +216,9 @@ All role assumptions and policy changes are logged via **AWS CloudTrail**.
 
 This enables rapid detection of misuse without granting persistent access.
 
----
+
 
 ## Conclusion
 
 This project demonstrates how to implement **secure, auditable, least‑privilege cross‑account access** using AWS IAM roles, MFA, and STS.
 It reflects real‑world enterprise security practices and avoids common IAM anti‑patterns such as shared credentials and over‑privileged users.
-
