@@ -6,7 +6,6 @@ This project demonstrates the design and implementation of a **production-grade,
 
 Rather than focusing on individual AWS services, the goal of this project is to show how a secure network foundation is designed: how exposure is controlled, how traffic is constrained, and how visibility is built in from the start. All infrastructure is defined as code so that intent is explicit, reviewable, and reproducible.
 
----
 
 ## Architecture Summary
 
@@ -18,7 +17,6 @@ The VPC uses the CIDR block **10.0.0.0/16** and spans **two Availability Zones**
 
 This tiered model reduces blast radius and ensures that only components with a clear justification are exposed.
 
----
 
 ## Subnet Design
 
@@ -30,7 +28,6 @@ This tiered model reduces blast radius and ensures that only components with a c
 
 The data tier has **no route to the internet**, by design.
 
----
 
 ## Network Segmentation and Routing
 
@@ -40,7 +37,6 @@ The data tier is intentionally isolated. Its route tables contain only local VPC
 
 Routing is treated as a first-class security control rather than a connectivity afterthought.
 
----
 
 ## Availability and Fault Isolation
 
@@ -48,7 +44,6 @@ Outbound internet access for private subnets is provided through **one NAT Gatew
 
 This design ensures predictable behavior during AZ-level disruptions and mirrors how production environments are typically architected.
 
----
 
 ## Traffic Control and Least Privilege
 
@@ -62,7 +57,6 @@ The resulting traffic flow is simple and defensible:
 
 Anything not explicitly allowed is denied by default.
 
----
 
 ## Defense in Depth
 
@@ -70,7 +64,6 @@ While Security Groups provide fine-grained control at the resource level, **Netw
 
 Together, routing, Security Groups, and Network ACLs form a layered defense model where no single control is relied upon exclusively.
 
----
 
 ## Visibility and Observability
 
@@ -78,7 +71,6 @@ To ensure traffic can be audited and investigated, **VPC Flow Logs** are enabled
 
 In a larger environment, this visibility layer can be extended to centralized logging, long-term storage, and security analytics platforms without changing the underlying network design.
 
----
 
 ## Private Access to AWS Services
 
@@ -86,7 +78,6 @@ The architecture avoids sending AWS service traffic over the public internet by 
 
 This allows private and isolated workloads to interact with required AWS services without introducing new internet exposure or relying on NAT for internal AWS traffic.
 
----
 
 ## Infrastructure as Code Approach
 
@@ -99,7 +90,6 @@ All resources in this project are provisioned using Terraform. There are no manu
 
 Terraform serves as the single source of truth for the entire network.
 
----
 
 ## Extensibility
 
@@ -107,7 +97,6 @@ The VPC is designed to support future growth without compromising security. Addi
 
 Because the architecture’s intent is encoded directly in infrastructure definitions, future changes are easier to reason about and less likely to introduce accidental exposure.
 
----
 
 ## Cleanup
 
@@ -118,9 +107,6 @@ terraform destroy
 ```
 
 Post-destroy verification ensures that no network resources, gateways, or endpoints remain.
-
----
-
 ## Key Takeaways
 
 This project demonstrates how secure cloud networking is achieved through intentional design rather than default configurations. By combining segmentation, controlled routing, least-privilege access, and built-in visibility, the VPC provides a strong foundation for secure workloads while remaining flexible and reproducible through Infrastructure as Code.
