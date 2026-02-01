@@ -187,10 +187,4 @@ DATA ROUTE TABLE:
      │  Flow Logs  │────────▶│ CloudWatch  │───────▶│   Alerts    │
      │             │         │    Logs     │         │  (Anomaly)  │
      └─────────────┘         └─────────────┘         └─────────────┘
-            │
-            │ Long-term storage
-            ▼
-     ┌─────────────┐       
-     │     S3      │
-     │  (Archive)  │
-     └─────────────┘
+
