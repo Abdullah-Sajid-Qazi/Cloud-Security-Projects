@@ -2,39 +2,21 @@
 
 ## Overview
 
-This project demonstrates how to design and implement a **production‑grade, security‑first AWS VPC** using **Infrastructure as Code (Terraform)**.
+This project demonstrates the design and implementation of a **production-grade, security-first AWS VPC** using **Infrastructure as Code (Terraform)**.
 
-The goal is not just to create networking resources, but to show **how a real cloud security engineer thinks about isolation, blast radius, routing, and visibility**. Every decision is intentional, documented, and reproducible.
-
-The environment is designed to be **short‑lived** (build → validate → destroy) so it remains cost‑effective while still following correct production patterns.
+Rather than focusing on individual AWS services, the goal of this project is to show how a secure network foundation is designed: how exposure is controlled, how traffic is constrained, and how visibility is built in from the start. All infrastructure is defined as code so that intent is explicit, reviewable, and reproducible.
 
 ---
 
-## Core Security Goals
+## Architecture Summary
 
-This VPC architecture is designed to mitigate:
+The VPC uses the CIDR block **10.0.0.0/16** and spans **two Availability Zones** for resilience and fault isolation. Within each AZ, the network is deliberately segmented into three tiers:
 
-* Accidental public exposure of internal workloads
-* Lateral movement in flat networks
-* Uncontrolled outbound internet access
-* Single‑AZ egress failures
-* Lack of visibility during incident response
+* **Public subnets** for internet-facing components
+* **Private application subnets** for workloads that require outbound access but should not be reachable from the internet
+* **Isolated data subnets** for sensitive resources that must never have internet connectivity
 
-Security is enforced at **multiple layers**, not a single control.
-
----
-
-## High‑Level Architecture
-
-* One VPC (`10.0.0.0/16`)
-* Two Availability Zones
-* Three subnet tiers per AZ:
-
-  * **Public** (internet‑facing)
-  * **Private Application** (no inbound internet)
-  * **Data / Isolated** (no internet access at all)
-
-All infrastructure is provisioned using Terraform. The AWS Console is used only for verification and evidence collection.
+This tiered model reduces blast radius and ensures that only components with a clear justification are exposed.
 
 ---
 
@@ -50,146 +32,95 @@ The data tier has **no route to the internet**, by design.
 
 ---
 
-## Routing Strategy
+## Network Segmentation and Routing
 
-### Public Tier
+Network segmentation is enforced primarily through routing. Public subnets are the only subnets associated with an Internet Gateway, making them the sole entry point from the internet. Private application subnets have no inbound internet routes and rely on **AZ-local NAT Gateways** for controlled outbound access. This allows workloads to reach external dependencies without becoming internet-reachable themselves.
 
-* Default route (`0.0.0.0/0`) → Internet Gateway
-* Hosts internet‑facing components only
+The data tier is intentionally isolated. Its route tables contain only local VPC routes, with no paths to an Internet Gateway or NAT Gateway. Even in the event of a workload compromise, this design prevents direct data exfiltration over the internet.
 
-### Private Application Tier
-
-* Default route (`0.0.0.0/0`) → AZ‑local NAT Gateway
-* No inbound internet access
-* No cross‑AZ egress dependency
-
-### Data Tier
-
-* Local VPC routing only
-* No Internet Gateway
-* No NAT Gateway
-
-Routing itself is treated as a **security control**, not just connectivity.
+Routing is treated as a first-class security control rather than a connectivity afterthought.
 
 ---
 
-## NAT Gateways (High Availability)
+## Availability and Fault Isolation
 
-* One NAT Gateway per Availability Zone
-* Each private subnet routes to its local NAT
+Outbound internet access for private subnets is provided through **one NAT Gateway per Availability Zone**. Each private subnet routes to the NAT Gateway in its own AZ, avoiding cross-AZ dependencies and hidden single points of failure.
 
-This avoids:
-
-* Single points of failure
-* Cross‑AZ traffic during outages
-
-Although this increases cost slightly, it reflects correct production design and remains affordable for short‑lived labs.
+This design ensures predictable behavior during AZ-level disruptions and mirrors how production environments are typically architected.
 
 ---
 
-## Security Groups (Primary Enforcement)
+## Traffic Control and Least Privilege
 
-Security Groups are implemented using **SG‑to‑SG references only**.
+Traffic between tiers is tightly controlled using **least-privilege Security Groups**. Access is defined using **security-group-to-security-group references**, rather than broad CIDR-based rules, to make intent explicit and minimize lateral movement.
 
-### Traffic Model
+The resulting traffic flow is simple and defensible:
 
-* Internet → ALB (HTTPS)
-* ALB → Application tier
-* Application tier → Data tier
+* Internet traffic terminates at the public tier
+* Only approved traffic is forwarded to the application tier
+* The data tier is reachable solely from the application tier on explicitly required ports
 
-No CIDR‑based trust is used between tiers. Each tier can only communicate with the tier directly above or below it.
-
----
-
-## Network ACLs (Guardrails)
-
-Network ACLs are used as **subnet‑level guardrails**, not primary controls.
-
-They provide:
-
-* Coarse‑grained protection
-* Emergency subnet‑wide blocking capability
-* Defense‑in‑depth alongside security groups
-
-Each tier has its own NACL aligned with its purpose.
+Anything not explicitly allowed is denied by default.
 
 ---
 
-## Visibility: VPC Flow Logs
+## Defense in Depth
 
-VPC Flow Logs are enabled at the **VPC level** and delivered to **CloudWatch Logs**.
+While Security Groups provide fine-grained control at the resource level, **Network ACLs** are used as subnet-level guardrails. These stateless controls provide an additional layer of protection, enabling coarse restrictions and emergency subnet-wide blocking if required.
 
-This provides:
-
-* Visibility into accepted and rejected traffic
-* Evidence for investigations
-* The ability to answer "what talked to what" during incidents
-
-Security without telemetry is incomplete. Flow Logs close that gap.
+Together, routing, Security Groups, and Network ACLs form a layered defense model where no single control is relied upon exclusively.
 
 ---
 
-## VPC Endpoints (Private AWS Access)
+## Visibility and Observability
 
-To prevent AWS service traffic from traversing the public internet:
+To ensure traffic can be audited and investigated, **VPC Flow Logs** are enabled at the VPC level and delivered to **CloudWatch Logs**. This provides visibility into both accepted and rejected traffic across all tiers.
 
-* **S3 Gateway Endpoint** is used for private and data tiers
-* **CloudWatch Logs Interface Endpoint** is used for private subnets
-
-This allows isolated resources to access required AWS services **without NAT or internet exposure**.
+In a larger environment, this visibility layer can be extended to centralized logging, long-term storage, and security analytics platforms without changing the underlying network design.
 
 ---
 
-## Infrastructure as Code Principles
+## Private Access to AWS Services
 
-This project follows strict IaC discipline:
+The architecture avoids sending AWS service traffic over the public internet by using **VPC Endpoints**. A gateway endpoint is used for Amazon S3, while interface endpoints enable private connectivity to services such as CloudWatch Logs.
 
-* No manual console configuration
-* Explicit resource definitions
+This allows private and isolated workloads to interact with required AWS services without introducing new internet exposure or relying on NAT for internal AWS traffic.
+
+---
+
+## Infrastructure as Code Approach
+
+All resources in this project are provisioned using Terraform. There are no manual configuration steps required in the AWS console. This approach ensures:
+
+* Consistent and repeatable deployments
 * Clear dependency ordering
-* Reproducible builds
-* Safe teardown using `terraform destroy`
+* Easier review of security-relevant changes
+* Safe teardown and recreation of the environment
 
-Terraform is the source of truth.
+Terraform serves as the single source of truth for the entire network.
 
 ---
 
-## Cost Awareness
+## Extensibility
 
-The environment is intended to run for only a few hours:
+The VPC is designed to support future growth without compromising security. Additional application or data subnets can be added per AZ, new services can be integrated through VPC Endpoints, and inspection or logging capabilities can be expanded centrally.
 
-* Multi‑AZ NAT Gateways
-* Flow Logs with short retention
-* Immediate teardown after validation
-
-This keeps total cost under a few dollars while still demonstrating real‑world architecture.
+Because the architecture’s intent is encoded directly in infrastructure definitions, future changes are easier to reason about and less likely to introduce accidental exposure.
 
 ---
 
 ## Cleanup
 
-After validation and evidence collection:
+After validation and documentation, the environment can be safely removed using Terraform:
 
 ```bash
 terraform destroy
 ```
 
-Post‑destroy checks:
-
-* NAT Gateways removed
-* Elastic IPs released
-* VPC Endpoints deleted
-* No running resources left behind
-
-Cleanup is treated as part of the project, not an afterthought.
+Post-destroy verification ensures that no network resources, gateways, or endpoints remain.
 
 ---
 
 ## Key Takeaways
 
-* Routing decisions directly impact security
-* Isolation must be enforced at multiple layers
-* Visibility is as important as prevention
-* Infrastructure as Code enables review, consistency, and safe destruction
-This project reflects how production VPCs are **designed, reviewed, and defended** in real cloud environments.
-
+This project demonstrates how secure cloud networking is achieved through intentional design rather than default configurations. By combining segmentation, controlled routing, least-privilege access, and built-in visibility, the VPC provides a strong foundation for secure workloads while remaining flexible and reproducible through Infrastructure as Code.
