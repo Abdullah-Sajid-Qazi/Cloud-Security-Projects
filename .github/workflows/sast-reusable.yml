@@ -12,17 +12,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run Semgrep (OWASP Top 10)
+      - name: Run Semgrep (OWASP Top 10 + Python)
         uses: returntocorp/semgrep-action@v1
         with:
-          config: >-
+          config: |
             p/owasp-top-ten
             p/python
-          severity: ERROR
-          generateSarif: true
+          args: >
+            --severity ERROR
+            --sarif
+            --output results/semgrep.sarif
 
       - name: Upload SARIF report
-        if: always()
+        if: ${{ hashFiles('results/semgrep.sarif') != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: semgrep-sarif
