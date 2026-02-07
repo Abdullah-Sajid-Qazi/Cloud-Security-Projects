@@ -22,36 +22,40 @@ Security tooling should empower developers, not frustrate them. This pipeline is
 
 The pipeline uses **reusable GitHub Actions workflows** for modularity. Each security check is isolated in its own workflow that can be called from multiple places.
 
-In this repository, active workflows live at the **repository root** (`.github/workflows/` at the top level), which is where GitHub Actions requires them to be. The CICD Security Pipeline project contains a complete copy of these workflows as a reference implementation.
+This project is a **portable, standalone implementation** that contains everything you need in one place:
 
 ```
-Repository Root:
-├── .github/workflows/              # Active workflows (GitHub runs these)
-│   ├── secret-scan.yml            # Trigger workflow
-│   ├── secret-scan-reusable.yml   # Reusable Gitleaks scan
-│   ├── sast.yml                   # Trigger workflow
-│   ├── sast-reusable.yml          # Reusable Semgrep scan
-│   ├── dependency-scan.yml
+CICD Security Pipeline/
+├── .github/workflows/              # Ready-to-use GitHub Actions workflows
+│   ├── secret-scan.yml            # Trigger workflow for secret detection
+│   ├── secret-scan-reusable.yml   # Reusable Gitleaks scan logic
+│   ├── sast.yml                   # Trigger workflow for static analysis
+│   ├── sast-reusable.yml          # Reusable Semgrep scan logic
+│   ├── dependency-scan.yml        # Trigger workflow for dependency scanning
 │   ├── dependency-scan-reusable.yml
-│   └── (etc)
-│
-└── CICD Security Pipeline/         # This project (portable reference)
-    ├── workflow-templates/         # Complete workflow examples to copy
-    │   ├── secret-scan.yml
-    │   ├── secret-scan-reusable.yml
-    │   ├── sast.yml
-    │   ├── sast-reusable.yml
-    │   └── (etc)
-    ├── policies/                   # Security rules and configs
-    ├── scripts/                    # Pre-commit hooks
-    └── demo/                       # Vulnerable apps for testing
+│   ├── container-scan.yml         # Container image scanning
+│   ├── container-scan-reusable.yml
+│   ├── iac-scan-reusable.yml      # Infrastructure as Code scanning
+│   ├── global-iac-scan.yml        # IaC scan trigger
+│   └── vpc-iac-scan.yml           # VPC-specific IaC scan
+├── policies/                       # Security rules and configurations
+│   ├── checkov-config/            # Checkov IaC scanning rules
+│   ├── exceptions/                # Document false positives
+│   └── semgrep-rules/             # Custom Semgrep security rules
+├── scripts/                        # Helper scripts
+│   └── pre-commit.sh              # Local pre-commit hooks
+└── demo/                           # Vulnerable demo apps for testing
+    ├── app.py                     # Flask app with security issues
+    ├── insecure.tf                # Vulnerable Terraform configs
+    ├── Dockerfile                 # Insecure container setup
+    └── requirements.txt           # Python dependencies
 ```
 
-This architecture allows us to:
-- Run the same security checks across multiple projects in the mono-repo
-- Update security tooling in one place
-- Keep the CICD project as a portable, standalone reference implementation
-- Scale security practices across the organization
+This architecture allows you to:
+- Copy the entire project to any repository and start using it immediately
+- Customize workflows and policies for your specific needs
+- Use reusable workflows to avoid duplicating security logic
+- Scale security practices across multiple repositories
 
 ## Security Scanning Components
 
@@ -278,38 +282,71 @@ Sometimes developers need to bypass security checks for legitimate reasons (hotf
 - GitHub repository with Actions enabled
 - Python, Terraform, or Docker projects to scan
 
-### Setup for a New Repository
+### Setup Instructions
 
-To implement this security pipeline in your own repository:
+This project is designed to be portable and easy to deploy to any repository. Here are three ways to use it:
 
-1. **Copy workflows to your repository root**:
+#### Option 1: Copy the Entire Project to Your Repository Root
+
+The simplest approach is to copy this entire `CICD Security Pipeline` directory to your repository:
+
 ```bash
-cp "CICD Security Pipeline/workflow-templates/"*.yml <your-repo>/.github/workflows/
+# From your repository root
+cp -r /path/to/CICD\ Security\ Pipeline/ ./
 ```
 
-2. **Copy security policies and configurations**:
+Then move the workflows to where GitHub expects them:
+
 ```bash
-cp -r "CICD Security Pipeline/policies/" <your-repo>/policies/
+# Move workflows to repository root (GitHub requires .github/workflows at root level)
+mkdir -p .github
+mv "CICD Security Pipeline/.github/workflows" .github/
 ```
 
-3. **Copy helper scripts**:
+#### Option 2: Selective Copy (Workflows Only)
+
+If you only want the workflows:
+
 ```bash
-cp -r "CICD Security Pipeline/scripts/" <your-repo>/scripts/
+# Create .github/workflows directory at your repository root
+mkdir -p .github/workflows
+
+# Copy all workflow files
+cp "CICD Security Pipeline/.github/workflows/"*.yml .github/workflows/
+
+# Copy policies and configurations (needed for the workflows to function)
+cp -r "CICD Security Pipeline/policies/" ./policies/
+
+# Optionally copy scripts for pre-commit hooks
+cp -r "CICD Security Pipeline/scripts/" ./scripts/
 ```
 
-4. **Install pre-commit hook** (optional but recommended):
+#### Option 3: Use This Repository Directly
+
+If you're working within this repository, the workflows are ready to use immediately. They will:
+- Scan all code in pull requests
+- Run scheduled scans on the main branch
+- Test the demo vulnerable applications
+
+### Post-Setup Steps
+
+1. **Install pre-commit hook** (optional but recommended):
 ```bash
-cp <your-repo>/scripts/pre-commit.sh <your-repo>/.git/hooks/pre-commit
-chmod +x <your-repo>/.git/hooks/pre-commit
+cp scripts/pre-commit.sh .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
 ```
 
-5. **Customize thresholds**: Edit `policies/checkov-config/.checkov.yml` and workflow files to match your risk tolerance.
+2. **Customize thresholds**: Edit `policies/checkov-config/.checkov.yml` and workflow files to match your risk tolerance and compliance requirements.
 
-6. **Test with a PR**: Make a code change and open a pull request. All security scans will run automatically.
+3. **Test with a PR**: Make a code change and open a pull request. All security scans will run automatically.
 
-### Using This Repository
+4. **Review findings**: Check the Actions tab in GitHub to see scan results.
 
-In this mono-repo, the workflows are already active at the repository root (`.github/workflows/`). They scan all projects including the demo vulnerable applications.
+### Important Notes
+
+- **GitHub requires workflows at repository root**: GitHub Actions only runs workflows from `.github/workflows/` at the repository root, not from subdirectories. That's why you need to move or copy the workflows to the root level.
+- **Relative paths in workflows**: The workflow files reference policies using relative paths (e.g., `policies/exceptions/exceptions.yml`). If you change the folder structure, update these paths accordingly.
+- **Reusable workflows**: The `-reusable.yml` files contain the actual scanning logic and are called by the trigger workflows (`*-scan.yml`). Keep both types of files together.
 
 ### What Happens on a Pull Request
 
