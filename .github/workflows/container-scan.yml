@@ -43,7 +43,7 @@ jobs:
         run: docker load -i /tmp/insecure-demo.tar
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@v0.20.0
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: insecure-demo:latest
           severity: CRITICAL,HIGH
@@ -53,7 +53,7 @@ jobs:
 
       - name: Run Trivy (JSON report)
         if: always()
-        uses: aquasecurity/trivy-action@v0.20.0
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: insecure-demo:latest
           severity: CRITICAL,HIGH
