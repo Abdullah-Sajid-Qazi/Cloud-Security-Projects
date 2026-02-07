@@ -17,11 +17,13 @@ jobs:
           pip install semgrep
           mkdir -p results
           semgrep scan --config=p/owasp-top-ten --config=p/python --sarif --output=results/semgrep.sarif --error
+          semgrep scan --config=p/owasp-top-ten --config=p/python --text --output=results/semgrep-report.txt || true
+          semgrep scan --config=p/owasp-top-ten --config=p/python --json --output=results/semgrep.json || true
 
-      - name: Upload SARIF report
+      - name: Upload security reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: semgrep-sarif
-          path: results/semgrep.sarif
+          name: semgrep-reports
+          path: results/
           retention-days: 30
