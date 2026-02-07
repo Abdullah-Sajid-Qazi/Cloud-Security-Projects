@@ -1,0 +1,13 @@
+name: Repository Dependency Scan
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 6 * * 1'   # Weekly Monday 6AM UTC
+  workflow_dispatch:
+
+jobs:
+  dependency-scan:
+    uses: ./.github/workflows/dependency-scan-reusable.yml

@@ -1,0 +1,34 @@
+# Checkov configuration for CI/CD pipeline scanning
+# https://www.checkov.io/2.Basics/CLI%20Command%20Reference.html
+
+# ─── Frameworks to scan ───
+framework:
+  - terraform
+
+# ─── Severity threshold: skip LOW findings ───
+# Only block on MEDIUM, HIGH, CRITICAL
+skip-check:
+  # Informational / low-risk checks to skip globally
+  - CKV_AWS_145   # S3 default encryption with CMK (SSE-S3 is acceptable)
+  - CKV2_AWS_6    # S3 bucket access logging (covered at org level via CloudTrail)
+
+# ─── Hard-fail checks: these always block the pipeline ───
+hard-fail-on:
+  - CKV_AWS_19    # S3 bucket encryption not enabled
+  - CKV_AWS_18    # S3 access logging not enabled
+  - CKV_AWS_21    # S3 versioning not enabled
+  - CKV_AWS_24    # Security group allows 0.0.0.0/0 ingress on SSH
+  - CKV_AWS_25    # Security group allows 0.0.0.0/0 ingress on RDP
+  - CKV_AWS_16    # RDS encryption not enabled
+  - CKV_AWS_17    # RDS logging not enabled
+  - CKV_AWS_23    # Security group attached to resource
+  - CKV_AWS_79    # IMDSv2 not enabled on EC2
+  - CKV_AWS_8     # Launch config encrypted
+
+# ─── Output ───
+output:
+  - cli
+  - json
+
+# ─── Compact output for readability ───
+compact: true

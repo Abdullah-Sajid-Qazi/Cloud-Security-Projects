@@ -1,0 +1,56 @@
+rules:
+  # Custom rule: Block hardcoded AWS access keys
+  - id: hardcoded-aws-access-key
+    patterns:
+      - pattern-regex: "AKIA[0-9A-Z]{16}"
+    message: >
+      Hardcoded AWS access key detected. Use environment variables
+      or AWS IAM roles instead.
+    languages: [generic]
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-798: Use of Hard-coded Credentials"
+
+  # Custom rule: Block hardcoded passwords in Python
+  - id: hardcoded-password-assignment
+    patterns:
+      - pattern: $VAR = "..."
+      - metavariable-regex:
+          metavariable: $VAR
+          regex: "(?i)(password|passwd|secret|api_key|apikey|token)"
+    message: >
+      Potential hardcoded credential in variable '$VAR'.
+      Use environment variables or a secrets manager.
+    languages: [python]
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-798: Use of Hard-coded Credentials"
+
+  # Custom rule: Ensure Flask debug mode is off
+  - id: flask-debug-enabled
+    pattern: app.run(..., debug=True, ...)
+    message: >
+      Flask debug mode is enabled. This exposes the interactive
+      debugger and should never be used in production.
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: security
+      cwe: "CWE-489: Active Debug Code"
+
+  # Custom rule: Block use of pickle (insecure deserialization)
+  - id: insecure-pickle-usage
+    patterns:
+      - pattern-either:
+          - pattern: pickle.loads(...)
+          - pattern: pickle.load(...)
+    message: >
+      Use of pickle is insecure and can lead to arbitrary code execution.
+      Use JSON or other safe serialization formats.
+    languages: [python]
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-502: Deserialization of Untrusted Data"

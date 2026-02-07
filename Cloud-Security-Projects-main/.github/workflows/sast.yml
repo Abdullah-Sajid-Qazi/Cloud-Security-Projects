@@ -1,0 +1,12 @@
+name: Repository SAST Scan
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  sast:
+    uses: ./.github/workflows/sast-reusable.yml

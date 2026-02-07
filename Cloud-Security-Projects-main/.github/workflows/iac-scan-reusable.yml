@@ -1,0 +1,74 @@
+name: Reusable IaC Security Scan
+
+on:
+  workflow_call:
+    inputs:
+      terraform_path:
+        required: true
+        type: string
+      strict:
+        required: false
+        type: boolean
+        default: false
+      artifact_name:
+        required: false
+        type: string
+        default: "checkov-iac-report"
+      skip_checks:
+        required: false
+        type: string
+        default: "CKV_AWS_145"  # Allow SSE-S3 instead of requiring CMK by default
+
+jobs:
+  iac-scan:
+    name: Terraform IaC Scan (Checkov)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+
+      - name: Terraform Init (no backend)
+        working-directory: ${{ inputs.terraform_path }}
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        working-directory: ${{ inputs.terraform_path }}
+        run: terraform validate
+
+      # STRICT MODE
+      - name: Run Checkov (Strict)
+        if: ${{ inputs.strict }}
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: ${{ inputs.terraform_path }}
+          framework: terraform
+          soft_fail: false
+          skip_check: ${{ inputs.skip_checks }}
+          output_format: cli,json
+          output_file_path: console,checkov-report.json
+
+      # BASELINE MODE
+      - name: Run Checkov (Baseline)
+        if: ${{ !inputs.strict }}
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: ${{ inputs.terraform_path }}
+          framework: terraform
+          soft_fail: true
+          output_format: cli,json
+          output_file_path: console,checkov-report.json
+
+      - name: Upload Checkov report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: checkov-report.json
+          retention-days: 30
+          if-no-files-found: ignore

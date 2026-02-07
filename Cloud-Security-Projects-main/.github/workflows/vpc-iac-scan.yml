@@ -1,0 +1,20 @@
+name: VPC Terraform Security Scan (Strict)
+
+on:
+  pull_request:
+    paths:
+      - "Secure VPC Using Infrastructure as Code/terraform/**"
+  push:
+    branches:
+      - main
+    paths:
+      - "Secure VPC Using Infrastructure as Code/terraform/**"
+
+jobs:
+  vpc-iac-scan:
+    uses: ./.github/workflows/iac-scan-reusable.yml
+    with:
+      terraform_path: "Secure VPC Using Infrastructure as Code/terraform"
+      strict: true
+      artifact_name: "vpc-iac-report"
+      skip_checks: ""  # No skips - enforce ALL checks for critical VPC infrastructure

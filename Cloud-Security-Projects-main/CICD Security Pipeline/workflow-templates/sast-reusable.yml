@@ -1,0 +1,30 @@
+name: Reusable SAST Scan
+
+on:
+  workflow_call:
+
+jobs:
+  sast:
+    name: Semgrep SAST
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Semgrep (OWASP Top 10)
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/owasp-top-ten
+            p/python
+          severity: ERROR
+          generateSarif: true
+
+      - name: Upload SARIF report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-sarif
+          path: semgrep.sarif
+          retention-days: 30

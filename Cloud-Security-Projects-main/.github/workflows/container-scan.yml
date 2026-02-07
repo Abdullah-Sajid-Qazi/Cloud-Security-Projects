@@ -1,0 +1,70 @@
+name: Demo Container Security Scan
+
+on:
+  pull_request:
+    paths:
+      - "CICD Security Pipeline/demo/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build container image
+        run: |
+          docker build -t insecure-demo:latest \
+            "CICD Security Pipeline/demo"
+
+      - name: Save image as artifact
+        run: |
+          docker save insecure-demo:latest -o /tmp/insecure-demo.tar
+
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: container-image
+          path: /tmp/insecure-demo.tar
+          retention-days: 1
+
+  scan:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: container-image
+          path: /tmp
+
+      - name: Load container image
+        run: docker load -i /tmp/insecure-demo.tar
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@v0.20.0
+        with:
+          image-ref: insecure-demo:latest
+          severity: CRITICAL,HIGH
+          exit-code: 1
+          ignore-unfixed: true
+          format: table
+
+      - name: Run Trivy (JSON report)
+        if: always()
+        uses: aquasecurity/trivy-action@v0.20.0
+        with:
+          image-ref: insecure-demo:latest
+          severity: CRITICAL,HIGH
+          exit-code: 0
+          ignore-unfixed: true
+          format: json
+          output: trivy-report.json
+
+      - name: Upload Trivy report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-container-report
+          path: trivy-report.json

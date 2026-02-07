@@ -1,0 +1,57 @@
+# Security Scan Exceptions Registry
+# ══════════════════════════════════
+# All exceptions MUST be documented here with justification.
+# Exceptions are reviewed quarterly and must have an expiry date.
+#
+# Format:
+#   - id: unique-exception-id
+#     tool: semgrep | checkov | trivy | gitleaks | dependency-check
+#     rule: the specific rule/check ID being suppressed
+#     file: file path or pattern affected
+#     reason: business/technical justification
+#     approved_by: name of approver
+#     created: date added
+#     expires: date exception must be re-evaluated
+#     ticket: link to tracking ticket
+
+exceptions:
+
+  # ─── EXAMPLE: Test fixtures with fake credentials ───
+  - id: EXC-001
+    tool: gitleaks
+    rule: generic-api-key
+    file: "CICD Security Pipeline/demo/app.py"
+    reason: >
+      Intentionally hardcoded fake AWS key (AKIA3EXAMPLE...) used
+      as a demo to prove secret scanning works. Not a real credential.
+    approved_by: Security Team
+    created: "2026-02-07"
+    expires: "2026-08-07"
+    ticket: "N/A - demo project"
+
+  # ─── EXAMPLE: Intentionally insecure Terraform for demo ───
+  - id: EXC-002
+    tool: checkov
+    rule: CKV_AWS_24
+    file: "CICD Security Pipeline/demo/insecure.tf"
+    reason: >
+      Intentionally insecure security group used to demonstrate
+      IaC scanning catching open SSH access. Not deployed to AWS.
+    approved_by: Security Team
+    created: "2026-02-07"
+    expires: "2026-08-07"
+    ticket: "N/A - demo project"
+
+  # ─── EXAMPLE: Known CVE in dev-only dependency ───
+  - id: EXC-003
+    tool: dependency-check
+    rule: CVE-2021-XXXXX
+    file: "CICD Security Pipeline/demo/requirements.txt"
+    reason: >
+      Vulnerability exists in dev-only dependency not shipped to
+      production. Upgrade blocked by compatibility issue. Mitigated
+      by network isolation.
+    approved_by: Security Team
+    created: "2026-02-07"
+    expires: "2026-05-07"
+    ticket: "N/A - demo project"
