@@ -6,6 +6,10 @@ on:
       terraform_path:
         required: true
         type: string
+      strict:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   iac-scan:
@@ -29,9 +33,20 @@ jobs:
         working-directory: ${{ inputs.terraform_path }}
         run: terraform validate
 
-      - name: Run Checkov
+      # STRICT MODE
+      - name: Run Checkov (Strict)
+        if: ${{ inputs.strict }}
         uses: bridgecrewio/checkov-action@v12
         with:
           directory: ${{ inputs.terraform_path }}
           framework: terraform
           soft_fail: false
+
+      # BASELINE MODE
+      - name: Run Checkov (Baseline)
+        if: ${{ !inputs.strict }}
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: ${{ inputs.terraform_path }}
+          framework: terraform
+          soft_fail: true
