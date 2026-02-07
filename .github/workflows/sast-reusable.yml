@@ -19,9 +19,9 @@ jobs:
             p/owasp-top-ten
             p/python
           args: >
-            --severity ERROR
+            --severity=ERROR
             --sarif
-            --output results/semgrep.sarif
+            --output=results/semgrep.sarif
 
       - name: Upload SARIF report
         if: ${{ hashFiles('results/semgrep.sarif') != '' }}
