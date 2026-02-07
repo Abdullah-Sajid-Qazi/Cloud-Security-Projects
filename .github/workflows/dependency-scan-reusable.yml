@@ -20,7 +20,8 @@ jobs:
           format: "ALL"
           out: "dependency-check-report"
           args: >
-            --failOnCVSS 9
+            --enableExperimental
+            --failOnCVSS 7
 
       - name: Upload Dependency-Check report
         if: always()
