@@ -1,0 +1,13 @@
+name: Global Terraform Security Scan
+
+on:
+  pull_request:
+    paths:
+      - "**/*.tf"
+
+jobs:
+  global-iac-scan:
+    uses: ./.github/workflows/iac-scan-reusable.yml
+    with:
+      terraform_path: "."
+      strict: false
