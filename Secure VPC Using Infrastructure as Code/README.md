@@ -1,4 +1,4 @@
-# Project – Secure AWS VPC using Infrastructure as Code (Terraform)
+# Project: Secure AWS VPC using Infrastructure as Code (Terraform)
 
 ## Overview
 
