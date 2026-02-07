@@ -4,7 +4,6 @@
 [![AWS](https://img.shields.io/badge/Cloud-AWS-232F3E?logo=amazon-aws)](https://aws.amazon.com/)
 [![CI/CD](https://img.shields.io/badge/DevSecOps-GitHub%20Actions-2088FF)](https://github.com/features/actions)
 
----
 
 ## 📖 About This Repository
 
@@ -17,7 +16,6 @@ Rather than isolated scripts, this repository documents my journey in building p
 * **Immutable Infrastructure:** All resources are defined in code (Terraform) to prevent configuration drift.
 * **Defense in Depth:** Controls are layered across identity, network, and application levels.
 
----
 
 ## 🏗️ Technical Scope
 
@@ -31,7 +29,6 @@ This repository allows me to experiment with and demonstrate competency in the f
 | **Compliance & GRC** | Automated Auditing, Cloud Benchmarks (CIS), Remediation planning. |
 | **Visibility & Response** | Centralized Logging, SIEM integration, Automated Incident Response. |
 
----
 
 ## 🛠️ Technology Stack
 
@@ -43,7 +40,6 @@ The projects in this repository are built using the following tools and technolo
 * **Scripting:** Python (Boto3), Bash
 * **Security Tools:** Prowler, Checkov, Trivy, OWASP ZAP
 
----
 
 ## 📂 Repository Structure
 
