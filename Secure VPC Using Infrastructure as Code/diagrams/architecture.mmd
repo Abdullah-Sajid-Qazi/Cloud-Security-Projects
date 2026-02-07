@@ -1,0 +1,33 @@
+flowchart LR
+  Internet --> IGW
+  IGW --> ALB
+
+  subgraph Public_Subnets
+    ALB
+    NAT_A
+    NAT_B
+  end
+
+  subgraph Private_Subnets
+    APP_A
+    APP_B
+  end
+
+  subgraph Data_Subnets
+    DB_A
+    DB_B
+  end
+
+  ALB --> APP_A
+  ALB --> APP_B
+
+  APP_A --> DB_A
+  APP_B --> DB_B
+
+  APP_A --> NAT_A
+  APP_B --> NAT_B
+
+  APP_A --> VPCE_S3
+  APP_B --> VPCE_S3
+  DB_A --> VPCE_S3
+  DB_B --> VPCE_S3
