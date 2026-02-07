@@ -1,0 +1,24 @@
+name: Demo Container Security Scan
+
+on:
+  pull_request:
+    paths:
+      - "CICD Security Pipeline/demo/**"
+
+jobs:
+  build-and-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build container image
+        run: |
+          docker build -t insecure-demo:latest \
+            "CICD Security Pipeline/demo"
+
+      - name: Scan container image
+        uses: ./.github/workflows/container-scan-reusable.yml
+        with:
+          image: insecure-demo:latest
