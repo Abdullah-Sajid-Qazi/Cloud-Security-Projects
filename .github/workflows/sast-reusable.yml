@@ -16,7 +16,7 @@ jobs:
         run: |
           pip install semgrep
           mkdir -p results
-          semgrep scan --config=p/owasp-top-ten --config=p/python --sarif --output=results/semgrep.sarif
+          semgrep scan --config=p/owasp-top-ten --config=p/python --sarif --output=results/semgrep.sarif --error
 
       - name: Upload SARIF report
         if: always()
