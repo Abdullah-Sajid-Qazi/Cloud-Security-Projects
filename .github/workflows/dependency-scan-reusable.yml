@@ -17,7 +17,7 @@ jobs:
         with:
           project: "cloud-security-projects"
           path: "."
-          format: "HTML,JSON"
+          format: "ALL"
           out: "dependency-check-report"
           args: >
             --failOnCVSS 9
